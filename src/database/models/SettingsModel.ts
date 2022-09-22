@@ -1,4 +1,5 @@
 import {model, Schema} from 'mongoose';
+
 import {reqBoolean, reqNumber, reqString, reqStringArray} from '../../utils/databaseUtil';
 
 interface SettingsI {

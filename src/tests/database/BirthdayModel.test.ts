@@ -1,14 +1,11 @@
 import mongoose from 'mongoose';
+
 import birthdayModel, {getBirthdaysFromMonth, getBirthdaysToday, updateBirthday} from '../../database/models/BirthdayModel';
 import logger from '../../utils/loggerUtil';
 
 describe('Birthday DB', () => {
     beforeAll(async () => {
-        await mongoose.connect(process.env.MONGO_URL + 'Birthdays' as string, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-        });
+        await mongoose.connect(process.env.MONGO_URL + 'Birthdays' as string);
     });
 
     afterEach(async () => {
