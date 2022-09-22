@@ -1,6 +1,7 @@
-# BediBot Rewrite
+# BediBot Version 3
 
 This is a rewrite of the BediBot Discord Bot written in TypeScript using the Sapphire Discord bot framework.
+Version 3 aims to update Sapphire Framework to v3 and add application commands.
 
 ## Adding the bot to a server
 - Ensure you have system messages enabled in your server
