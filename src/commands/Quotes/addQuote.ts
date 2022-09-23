@@ -45,10 +45,52 @@ module.exports = class AddQuoteCommand extends Command {
                 },
             ],
         });
+        
+        registry.registerContextMenuCommand({name: 'Add Quote', type: 'MESSAGE'});
+    }
+
+    public async chatInputRun(interaction: Command.ChatInputInteraction)
+    {
+        //Get guildId from interaction
+        const guildId = interaction.guildId;
+        const settingsData = await getSettings(guildId as string);
+        const date = moment().toDate();
+
+        //As of now you cannot reply and run chatInput... only supporting message quotes for now
+        let author: User = interaction.user;
+        let quote: string = interaction.options.getString('quote')!;
+        let displayQuote = quote;
+        if (!displayQuote.includes('<')) displayQuote = Formatters.inlineCode(quote);
+        let quoteAuthor: string = interaction.options.getString('author')!;
+
+        const embed = new BediEmbed()
+                          .setColor(colors.ACTION)
+                          .setTitle(`${TITLE_BEFORE_NUM_APPROVALS}0/${settingsData.quoteApprovalsRequired}`);
+
+        if (typeof quoteAuthor === 'string') {
+            embed.setDescription(
+                `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
+                    Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
+        } else {
+            embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
+                Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
+        }
+
+        const row = new MessageActionRow().addComponents(
+            new MessageButton().setCustomId('QuoteApprove').setLabel('Approve').setStyle('SUCCESS'),
+        );
+
+        const response = await interaction.reply({
+            embeds: [embed],
+            components: [row],
+        });
+
+        await this.setupQuoteCollector(response, quoteAuthor, author, quote, date, guildId as String);
     }
 
     public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
 
+        //Note: need to see if we can add arguments to context menu run?
         const msg = await interaction.reply({embeds: [initialEmbed], fetchReply: true});
 
         const editEmbed = new BediEmbed().setTitle('Test!').setDescription(`test`);
@@ -145,8 +187,15 @@ module.exports = class AddQuoteCommand extends Command {
             components: [row],
         });
 
+        await this.setupQuoteCollector(response, quoteAuthor, author, quote, date, guildId as string);
+    }
+
+    //Take in response and set up collector
+    private async setupQuoteCollector(response: Message, quoteAuthor: User | string | null, author: User, quote: string, date: Date, guildId: string) {
         let numApprovals = 0;
         let approvedByString = '';
+        let displayQuote = quote;
+        const settingsData = await getSettings(guildId);
 
         const collector = response.createMessageComponentCollector({componentType: 'BUTTON', time: 10000000});
         collector.on('collect', async interaction => {
@@ -218,7 +267,7 @@ module.exports = class AddQuoteCommand extends Command {
                     })
                     .catch(
                         () => logger.error(
-                            `Unable to edit Add Quote Response in ${message.guild?.name}.` +
+                            `Unable to edit Add Quote Response in ${response.guild?.name}.` +
                             `Usually due to response being deleted by an admin.`));
             }
         });
