@@ -2,7 +2,7 @@ import {Precondition} from '@sapphire/framework';
 import {Message} from 'discord.js';
 import {getSettings} from '../database/models/SettingsModel';
 
-export class QuotesEnabledPrecondition extends Precondition {
+module.exports = class QuotesEnabledPrecondition extends Precondition {
     public async messageRun(message: Message) {
         const {guildId, author} = message;
 

@@ -1,7 +1,7 @@
 import {Precondition} from '@sapphire/framework';
 import {Message, Permissions} from 'discord.js';
 
-export class ManageRolesPermPrecondition extends Precondition {
+module.exports = class ManageRolesPermPrecondition extends Precondition {
     public messageRun(message: Message) {
         if (message.guild && message.guild.me?.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
             return this.ok();

@@ -4,7 +4,7 @@ import {Formatters, Message} from 'discord.js';
 import {getSettings} from '../database/models/SettingsModel';
 import {userVerifiedInGuild} from '../database/models/VerifiedUserModel';
 
-export class UserVerifiedPrecondition extends Precondition {
+module.exports = class UserVerifiedPrecondition extends Precondition {
     public async messageRun(message: Message) {
         const {guildId, author} = message;
 

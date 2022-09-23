@@ -2,7 +2,7 @@ import {Precondition} from '@sapphire/framework';
 import {Formatters, Message} from 'discord.js';
 import {getSettings} from '../database/models/SettingsModel';
 
-export class DueDatesSetupPrecondition extends Precondition {
+module.exports = class DueDatesSetupPrecondition extends Precondition {
     public async messageRun(message: Message) {
         const {guildId} = message;
 
