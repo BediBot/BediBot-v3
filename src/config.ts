@@ -1,24 +1,25 @@
 import {LogLevel} from '@sapphire/framework';
-import {ClientOptions, Intents} from 'discord.js';
+import {ClientOptions} from 'discord.js';
 
 import {fetchPrefix} from './utils/discordUtil';
-import {getRandomStatus} from './utils/statusUtil';
+import {getRandomStatus} from "./utils/statusUtil";
 
 export const DEFAULT_PREFIX = '$';
 export const MAX_QUOTE_LENGTH = 1000;
 
 export const CLIENT_OPTIONS: ClientOptions = {
     intents: [
-        Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_INTEGRATIONS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES,
-        Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_MEMBERS
+        'GUILDS', 'GUILD_MEMBERS', 'GUILD_BANS', 'GUILD_EMOJIS_AND_STICKERS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES',
+        'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS'
     ],
     defaultPrefix: DEFAULT_PREFIX,
     caseInsensitiveCommands: true,
     caseInsensitivePrefixes: true,
     presence: getRandomStatus(),
     logger: {
-        level: LogLevel.None,
+        level: LogLevel.Debug,
     },
     partials: ['CHANNEL', 'MESSAGE', 'REACTION'],
+    loadMessageCommandListeners: true,
     fetchPrefix: fetchPrefix,
 };

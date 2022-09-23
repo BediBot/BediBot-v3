@@ -1,13 +1,10 @@
 import mongoose from 'mongoose';
+
 import quoteModel, {getQuotesFromAuthor} from '../../database/models/QuoteModel';
 
 describe('Settings DB', () => {
     beforeAll(async () => {
-        await mongoose.connect(process.env.MONGO_URL + 'settings' as string, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-        });
+        await mongoose.connect(process.env.MONGO_URL + 'settings' as string);
     });
 
     afterEach(async () => {

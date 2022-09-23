@@ -1,4 +1,5 @@
 import {model, Schema} from 'mongoose';
+
 import {reqDate, reqString} from '../../utils/databaseUtil';
 
 interface BirthdayI {

@@ -1,9 +1,10 @@
-import {container, SapphireClient} from '@sapphire/framework';
+import {Command, container, SapphireClient} from '@sapphire/framework';
 import {Collection, Guild, GuildMember, Message, Role, ThreadChannel} from 'discord.js';
 import moment from 'moment-timezone/moment-timezone-utils';
 
 import {DEFAULT_PREFIX} from '../config';
 import {getSettings} from '../database/models/SettingsModel';
+import {BediEmbed} from '../lib/BediEmbed';
 
 import logger from './loggerUtil';
 
