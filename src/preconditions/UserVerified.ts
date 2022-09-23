@@ -5,7 +5,7 @@ import {getSettings} from '../database/models/SettingsModel';
 import {userVerifiedInGuild} from '../database/models/VerifiedUserModel';
 
 export class UserVerifiedPrecondition extends Precondition {
-    public async run(message: Message) {
+    public async messageRun(message: Message) {
         const {guildId, author} = message;
 
         const settingsData = await getSettings(guildId as string);

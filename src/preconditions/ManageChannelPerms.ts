@@ -2,7 +2,7 @@ import {Precondition} from '@sapphire/framework';
 import {Message, Permissions} from 'discord.js';
 
 export class ManageChannelsPermPrecondition extends Precondition {
-    public run(message: Message) {
+    public messageRun(message: Message) {
         if (message.guild && message.guild.me?.permissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) {
             return this.ok();
         }

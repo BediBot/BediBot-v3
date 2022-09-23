@@ -3,7 +3,7 @@ import {Message} from 'discord.js';
 import {getSettings} from '../database/models/SettingsModel';
 
 export class QuotesEnabledPrecondition extends Precondition {
-    public async run(message: Message) {
+    public async messageRun(message: Message) {
         const {guildId, author} = message;
 
         const settingsData = await getSettings(guildId as string);
