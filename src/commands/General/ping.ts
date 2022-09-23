@@ -8,11 +8,11 @@ import logger from '../../utils/loggerUtil';
 
 const initialEmbed = new BediEmbed().setTitle('Ping?');
 
-export class UserCommand extends Command {
+module.exports = class PingCommand extends Command {
     public constructor(context: Command.Context, options: Command.Options) {
         super(context, {
             ...options,
-            name: 'Ping',
+            name: 'ping',
             description: 'Pings the Bot'
         });
     }
@@ -24,7 +24,6 @@ export class UserCommand extends Command {
     }
 
     public async messageRun(message: Message) {
-        logger.warn(this.name);
         const msg = await reply(message, {
             embeds: [initialEmbed],
         });
