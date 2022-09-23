@@ -20,5 +20,5 @@ export const CLIENT_OPTIONS: ClientOptions = {
     },
     partials: ['CHANNEL', 'MESSAGE', 'REACTION'],
     loadMessageCommandListeners: true,
-    // fetchPrefix: fetchPrefix,
+    fetchPrefix: fetchPrefix,
 };
