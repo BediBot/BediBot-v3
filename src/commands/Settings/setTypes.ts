@@ -22,8 +22,8 @@ module.exports = class SetTypesCommand extends Command {
         const {guildId} = message;
         const settingsData = await getSettings(guildId as string);
 
-        const newValues = await args.repeatResult('string');
-        if (!newValues.success) {
+        const newValues = await args.repeat('string').catch(() => null);
+        if (!newValues) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Set Types Reply')
@@ -32,7 +32,7 @@ module.exports = class SetTypesCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        if (new Set(newValues.value).size != newValues.value.length) {
+        if (new Set(newValues).size != newValues.length) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Set Types Reply')
@@ -40,11 +40,11 @@ module.exports = class SetTypesCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        await settingsModel.updateOne({_id: guildId as string}, {types: newValues.value});
+        await settingsModel.updateOne({_id: guildId as string}, {types: newValues});
 
         let description = 'The due date types have been updated to: ';
 
-        for (const value of newValues.value) {
+        for (const value of newValues) {
             description += `${Formatters.inlineCode(value)} `;
         }
 

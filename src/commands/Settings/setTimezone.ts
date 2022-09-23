@@ -25,8 +25,8 @@ module.exports = class SetTimezoneCommand extends Command {
         const settingsData = await getSettings(guildId as string);
 
         // Check if they even inputted a string
-        const newValue = await args.peekResult('string');
-        if (!newValue.success) {
+        const newValue = await args.peek('string').catch(() => null);
+        if (!newValue) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Set Timezone Reply')
@@ -35,23 +35,23 @@ module.exports = class SetTimezoneCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        if (!momentTZ.tz.names().includes(newValue.value)) {
+        if (!momentTZ.tz.names().includes(newValue)) {
             const embed =
                 new BediEmbed()
                     .setColor(colors.ERROR)
                     .setTitle('Set Timezone Reply')
                     .setDescription(
-                        `${Formatters.inlineCode(newValue.value)} is not a valid timezone.` +
+                        `${Formatters.inlineCode(newValue)} is not a valid timezone.` +
                         `\n\nThe input must be the [TZ Database Name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) on the timezone.`);
             return message.reply({embeds: [embed]});
         }
 
-        await settingsModel.updateOne({_id: guildId as string}, {timezone: newValue.value});
+        await settingsModel.updateOne({_id: guildId as string}, {timezone: newValue});
 
         const embed = new BediEmbed()
                           .setTitle('Set Timezone Reply')
                           .setColor(colors.SUCCESS)
-                          .setDescription(`The timezone has been updated to ${Formatters.inlineCode(newValue.value)}`);
+                          .setDescription(`The timezone has been updated to ${Formatters.inlineCode(newValue)}`);
         return message.reply({embeds: [embed]});
     };
 };

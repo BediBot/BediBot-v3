@@ -25,17 +25,16 @@ module.exports = class GetRandomQuoteCommand extends Command {
 
         let quoteAuthor;
 
-        quoteAuthor = await args.pickResult('user');
-        if (!quoteAuthor.success) quoteAuthor = await args.pickResult('string');
+        quoteAuthor = await args.pick('user').catch(() => null);
+        if (!quoteAuthor) quoteAuthor = await args.pickResult('string');
 
         let quoteDoc;
 
-        if (!quoteAuthor.success) {
+        if (!quoteAuthor) {
             quoteDoc = await getRandomQuoteInGuild(guildId as string);
             quoteAuthor = quoteDoc?.name;
         } else {
-            quoteDoc = await getRandomQuoteFromAuthor(guildId as string, quoteAuthor.value.toString());
-            quoteAuthor = quoteAuthor.value;
+            quoteDoc = await getRandomQuoteFromAuthor(guildId as string, quoteAuthor.toString());
         }
 
         if (!quoteDoc) {

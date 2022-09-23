@@ -23,8 +23,8 @@ module.exports = class SetApprovalsCommand extends Command {
         const settingsData = await getSettings(guildId as string);
 
         // Check if they even inputted a string
-        const newValue = await args.peekResult('integer');
-        if (!newValue.success) {
+        const newValue = await args.peek('integer').catch(() => null);
+        if (!newValue) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Set Quote Approvals Reply')
@@ -33,13 +33,13 @@ module.exports = class SetApprovalsCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        await settingsModel.updateOne({_id: guildId as string}, {quoteApprovalsRequired: newValue.value});
+        await settingsModel.updateOne({_id: guildId as string}, {quoteApprovalsRequired: newValue});
 
         const embed = new BediEmbed()
                           .setTitle('Set Quote Approvals Reply')
                           .setColor(colors.SUCCESS)
                           .setDescription(`The number of quote approvals required has been updated to ${
-                              Formatters.inlineCode(newValue.value.toString())}`);
+                              Formatters.inlineCode(newValue.toString())}`);
         return message.reply({embeds: [embed]});
     };
 };

@@ -28,9 +28,9 @@ module.exports = class BirthdayAnnouncementCommand extends Command {
         const {guildId, channelId} = message;
         const settingsData = await getSettings(guildId as string);
 
-        const announcementTime = await args.pickResult('string');
+        const announcementTime = await args.pick('string').catch(() => null);
 
-        if (!announcementTime.success) {
+        if (!announcementTime) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Birthday Announcement Reply')
@@ -39,7 +39,7 @@ module.exports = class BirthdayAnnouncementCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        if (!isValidTime(announcementTime.value)) {
+        if (!isValidTime(announcementTime)) {
             const embed =
                 new BediEmbed()
                     .setColor(colors.ERROR)
@@ -50,18 +50,18 @@ module.exports = class BirthdayAnnouncementCommand extends Command {
 
         // Check if they even inputted a string
         let role = null;
-        const roleString = await args.peekResult('string');
-        if (roleString.success) {
+        const roleString = await args.peek('string').catch(() => null);
+        if (roleString) {
             // Check if the string is a valid role
-            const roleArg = await args.restResult('role');
-            if (!roleArg.success) {
+            const roleArg = await args.rest('role').catch(() => null);
+            if (!roleArg) {
                 const embed = new BediEmbed()
                                   .setColor(colors.ERROR)
                                   .setTitle('Birthday Announcement Reply')
                                   .setDescription('That is not a valid role.');
                 return message.reply({embeds: [embed]});
             }
-            role = roleArg.value;
+            role = roleArg;
         }
 
         await agenda.cancel({
@@ -88,7 +88,7 @@ module.exports = class BirthdayAnnouncementCommand extends Command {
 
         const job = await agenda.create(BIRTH_ANNOUNCE_JOB_NAME, data);
 
-        await job.repeatEvery('one day', {skipImmediate: true}).schedule(announcementTime.value);
+        await job.repeatEvery('one day', {skipImmediate: true}).schedule(announcementTime);
 
         const localRunTime = job.attrs.nextRunAt;
 

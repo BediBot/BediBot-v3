@@ -29,27 +29,27 @@ module.exports = class RemoveDueDateCommand extends Command {
         const {guildId} = message;
         const settingsData = await getSettings(guildId as string);
 
-        const title = await args.pickResult('string');
+        const title = await args.pick('string').catch(() => null);
         let month;
-        month = await args.pickResult('integer');
-        if (!month.success) month = await args.pickResult('string');
-        const day = await args.pickResult('integer');
-        const year = await args.pickResult('integer');
-        const timeString = await args.restResult('string');
+        month = await args.pick('integer').catch(() => null);
+        if (!month) month = await args.pick('string').catch(() => null);
+        const day = await args.pick('integer').catch(() => null);
+        const year = await args.pick('integer').catch(() => null);
+        const timeString = await args.rest('string').catch(() => null);
 
-        if (!title.success || !month.success || !day.success || !year.success) return invalidSyntaxReply(message, settingsData);
+        if (!title || !month || !day || !year) return invalidSyntaxReply(message, settingsData);
 
         // If month is a string, parse it into a date and extract the month number. This works with full month and short
         // forms as well.
-        month = isValidMonth(month.value);
+        month = isValidMonth(month);
 
         if (!month) return invalidSyntaxReply(message, settingsData);
 
-        let date = new Date(year.value, month - 1, day.value);
+        let date = new Date(year, month - 1, day);
 
         // Sometimes an invalid date can be created but the date will change e.g Feb 29, 2021 becomes Mar 1, 2021. This
         // doesn't let those cases through
-        if (didDateChange(date, day.value, month, year.value)) {
+        if (didDateChange(date, day, month, year)) {
             const embed =
                 new BediEmbed().setColor(colors.ERROR).setTitle('Remove Due Date Reply').setDescription('That date is invalid!');
             return message.channel.send({embeds: [embed]});
@@ -59,8 +59,8 @@ module.exports = class RemoveDueDateCommand extends Command {
 
         let dateOnly = true;
 
-        if (timeString.success) {
-            if (!isValidTime(timeString.value)) {
+        if (timeString) {
+            if (!isValidTime(timeString)) {
                 const embed = new BediEmbed()
                                   .setColor(colors.ERROR)
                                   .setTitle('Remove Due Date Reply')
@@ -68,7 +68,7 @@ module.exports = class RemoveDueDateCommand extends Command {
                 return message.reply({embeds: [embed]});
             }
 
-            const job = await agenda.schedule(timeString.value, 'Dummy Job', {});
+            const job = await agenda.schedule(timeString, 'Dummy Job', {});
             const tempDate = job.attrs.nextRunAt;
             await job.remove();
 
@@ -121,9 +121,9 @@ module.exports = class RemoveDueDateCommand extends Command {
         const embed = new BediEmbed().setColor(colors.ACTION).setTitle('Remove Due Date Reply');
 
         if (dateOnly)
-            embed.setDescription(`${Formatters.inlineCode(title.value)} due <t:${Math.round(date.valueOf() / 1000)}:D>`);
+            embed.setDescription(`${Formatters.inlineCode(title)} due <t:${Math.round(date.valueOf() / 1000)}:D>`);
         else
-            embed.setDescription(`${Formatters.inlineCode(title.value)} due <t:${Math.round(date.valueOf() / 1000)}:F>`);
+            embed.setDescription(`${Formatters.inlineCode(title)} due <t:${Math.round(date.valueOf() / 1000)}:F>`);
         const reply = await message.reply({
             embeds: [embed],
             components: [typeSelect, categorySelect, courseSelect, buttons],
@@ -206,7 +206,7 @@ module.exports = class RemoveDueDateCommand extends Command {
                 });
             }
 
-            if (!(await removeDueDate(guildId as string, title.value, date, type, category, course, dateOnly))) {
+            if (!(await removeDueDate(guildId as string, title, date, type, category, course, dateOnly))) {
                 const embed =
                     new BediEmbed().setTitle('Remove Due Date Reply').setColor(colors.ERROR).setDescription('Due Date not found');
 

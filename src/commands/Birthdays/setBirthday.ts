@@ -29,26 +29,26 @@ module.exports = class SetBirthdayCommand extends Command {
         const prefix = (await fetchPrefix(message))[0];
 
         let month;
-        month = await args.pickResult('integer');
-        if (!month.success) month = await args.pickResult('string');
-        const day = await args.pickResult('integer');
-        const year = await args.pickResult('integer');
+        month = await args.pick('integer').catch(() => null);
+        if (!month) month = await args.pick('string').catch(() => null);
+        const day = await args.pick('integer').catch(() => null);
+        const year = await args.pick('integer').catch(() => null);
 
         if (guild) await message.delete();
 
-        if (!month.success || !day.success || !year.success) return invalidSyntaxReply(message, prefix);
+        if (!month || !day || !year) return invalidSyntaxReply(message, prefix);
 
         // If month is a string, parse it into a date and extract the month number. This works with full month and short
         // forms as well.
-        month = isValidMonth(month.value);
+        month = isValidMonth(month);
 
         if (!month) return invalidSyntaxReply(message, prefix);
 
-        let birthday = new Date(year.value, (month as number) - 1, day.value);
+        let birthday = new Date(year, (month as number) - 1, day);
 
         // Sometimes an invalid date can be created but the date will change e.g Feb 29, 2021 becomes Mar 1, 2021. This
         // doesn't let those cases through
-        if (didDateChange(birthday, day.value, month as number, year.value)) {
+        if (didDateChange(birthday, day, month as number, year)) {
             const embed =
                 new BediEmbed().setColor(colors.ERROR).setTitle('Set Birthday Reply').setDescription('That date is invalid!');
             return message.channel.send({embeds: [embed]});

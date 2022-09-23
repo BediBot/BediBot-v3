@@ -40,8 +40,8 @@ module.exports = class ConfirmCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        const uniqueKey = await args.pickResult('string');
-        if (!uniqueKey.success) {
+        const uniqueKey = await args.pick('string').catch(() => null);
+        if (!uniqueKey) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Confirm Reply')
@@ -51,7 +51,7 @@ module.exports = class ConfirmCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        if (!(await validUniqueKey(author.id, guildId as string, uniqueKey.value))) {
+        if (!(await validUniqueKey(author.id, guildId as string, uniqueKey))) {
             const embed = new BediEmbed().setColor(colors.ERROR).setTitle('Confirm Reply').setDescription('Invalid key!');
             return message.reply({embeds: [embed]});
         }

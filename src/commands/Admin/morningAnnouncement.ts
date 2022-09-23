@@ -27,9 +27,9 @@ module.exports = class MorningAnnouncementCommand extends Command {
         const {guildId, channelId} = message;
         const settingsData = await getSettings(guildId as string);
 
-        const announcementTime = await args.restResult('string');
+        const announcementTime = await args.rest('string').catch(() => null);
 
-        if (!announcementTime.success) {
+        if (!announcementTime) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Morning Announcement Reply')
@@ -38,7 +38,7 @@ module.exports = class MorningAnnouncementCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        if (!isValidTime(announcementTime.value)) {
+        if (!isValidTime(announcementTime)) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Morning Announcement Reply')
@@ -57,7 +57,7 @@ module.exports = class MorningAnnouncementCommand extends Command {
             autoDelete: false,
         });
 
-        await job.repeatEvery('one day', {skipImmediate: true}).schedule(announcementTime.value);
+        await job.repeatEvery('one day', {skipImmediate: true}).schedule(announcementTime);
 
         const localRunTime = job.attrs.nextRunAt;
 

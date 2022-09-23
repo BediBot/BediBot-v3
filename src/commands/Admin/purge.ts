@@ -25,8 +25,8 @@ module.exports = class PurgeCommand extends Command {
         const {guildId} = message;
         const settingsData = await getSettings(guildId as string);
         // Check if args length is valid, and then read the number
-        const numMessagesToDelete = await args.pickResult('integer');
-        if (!numMessagesToDelete.success) {
+        const numMessagesToDelete = await args.pick('integer').catch(() => null);
+        if (!numMessagesToDelete) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Purge Reply')
@@ -36,7 +36,7 @@ module.exports = class PurgeCommand extends Command {
         }
 
         // Check if the number is within the bounds expected
-        if (!(numMessagesToDelete.value > 0 && numMessagesToDelete.value <= BULK_DELETE_MAX)) {
+        if (!(numMessagesToDelete > 0 && numMessagesToDelete <= BULK_DELETE_MAX)) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Purge Reply')
@@ -95,7 +95,7 @@ module.exports = class PurgeCommand extends Command {
         {
         */
         // Perform the deletion
-        const numMessagesDeleted = await purgeMessages(message, numMessagesToDelete.value);
+        const numMessagesDeleted = await purgeMessages(message, numMessagesToDelete);
 
         // Cleanup messages that don't need to be there anymore
         await message.delete();

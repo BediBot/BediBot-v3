@@ -27,8 +27,9 @@ module.exports = class LockdownCommand extends Command {
         const settingsData = await getSettings(guildId as string);
 
         // Check if they even inputted a string
-        const roleString = await args.peekResult('string');
-        if (!roleString.success) {
+        const roleString = await args.peek('string').catch(() => null);
+
+        if (!roleString) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Lockdown Reply')
@@ -38,8 +39,9 @@ module.exports = class LockdownCommand extends Command {
         }
 
         // Check if the string is a valid role
-        const role = await args.pickResult('role');
-        if (!role.success) {
+        const role = await args.pick('role').catch(() => null);
+
+        if (!role) {
             const embed =
                 new BediEmbed().setColor(colors.ERROR).setTitle('Lockdown Reply').setDescription('That is not a valid role.');
             return message.reply({embeds: [embed]});
@@ -48,17 +50,17 @@ module.exports = class LockdownCommand extends Command {
         // This should never return due to the GuildOnly precondition
         if (!(message.channel instanceof GuildChannel)) return;
 
-        await message.channel.permissionOverwrites.edit(role.value, {SEND_MESSAGES: false});
+        await message.channel.permissionOverwrites.edit(role, {SEND_MESSAGES: false});
 
-        const durationOrTime = await args.restResult('string');
-        if (!durationOrTime.success) {
+        const durationOrTime = await args.rest('string').catch(() => null);
+        if (!durationOrTime) {
             const embed =
-                new BediEmbed().setTitle('Lockdown Reply').setDescription(`Channel has been locked for ${role.value.toString()}`);
+                new BediEmbed().setTitle('Lockdown Reply').setDescription(`Channel has been locked for ${role.toString()}`);
             return message.reply({embeds: [embed]});
         }
 
         // Check if duration they entered is valid -> see human-interval module for valid durations
-        if (!isValidDurationOrTime(durationOrTime.value)) {
+        if (!isValidDurationOrTime(durationOrTime)) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Lockdown Reply')
@@ -71,18 +73,18 @@ module.exports = class LockdownCommand extends Command {
             'name': UNLOCK_JOB_NAME,
             'data.guildId': guildId,
             'data.channelId': channelId,
-            'data.roleId': role.value.id,
+            'data.roleId': role.id,
         });
 
         // Schedule job
-        const job = await agenda.schedule(durationOrTime.value, UNLOCK_JOB_NAME, {
+        const job = await agenda.schedule(durationOrTime, UNLOCK_JOB_NAME, {
             guildId: guildId,
             channelId: channelId,
-            roleId: role.value.id,
+            roleId: role.id,
             messageId: message.id,
         });
 
-        if (isValidTime(durationOrTime.value)) {
+        if (isValidTime(durationOrTime)) {
             const localRunTime = job.attrs.nextRunAt;
 
             const nextRun = moment.tz(moment().format('YYYY-MM-DD'), settingsData.timezone);
@@ -97,7 +99,7 @@ module.exports = class LockdownCommand extends Command {
         const embed = new BediEmbed()
                           .setTitle('Lockdown Reply')
                           .setColor(colors.SUCCESS)
-                          .setDescription(`Channel has been locked for ${role.value.toString()}\nUnlock scheduled <t:${
+                          .setDescription(`Channel has been locked for ${role.toString()}\nUnlock scheduled <t:${
                               Math.round(nextRun!.valueOf() / 1000)}:R>`);
         return message.reply({embeds: [embed]});
     }

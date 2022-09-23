@@ -24,9 +24,9 @@ module.exports = class DisplayDueDatesCommand extends Command {
         const {guildId, channelId} = message;
         const settingsData = await getSettings(guildId as string);
 
-        const categoryArg = await args.restResult('string');
+        const categoryArg = await args.rest('string').catch(() => null);
 
-        if (!categoryArg.success) {
+        if (!categoryArg) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Display Due Dates Reply')
@@ -35,7 +35,7 @@ module.exports = class DisplayDueDatesCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        if (!settingsData.categories.includes(categoryArg.value)) {
+        if (!settingsData.categories.includes(categoryArg)) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Display Due Dates Reply')
@@ -50,7 +50,7 @@ module.exports = class DisplayDueDatesCommand extends Command {
         const jobs = await agenda.jobs({
             name: DUE_DATE_UPDATE_JOB_NAME,
             'data.guildId': guildId,
-            'data.category': categoryArg.value,
+            'data.category': categoryArg,
         });
 
         if (jobs.length != 0) {
@@ -61,7 +61,7 @@ module.exports = class DisplayDueDatesCommand extends Command {
             guildId: guildId,
             channelId: channelId,
             messageId: reply.id,
-            category: categoryArg.value,
+            category: categoryArg,
         });
 
         await job.repeatEvery('60 seconds').save();

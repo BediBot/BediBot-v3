@@ -21,9 +21,9 @@ module.exports = class SayCommand extends Command {
         const settingsData = await getSettings(guildId as string);
 
         // Pick the title and content from args, return error if invalid
-        const sayTitle = await args.pickResult('string');
-        const sayContent = await args.pickResult('string');
-        if (!sayTitle.success || !sayContent.success) {
+        const sayTitle = await args.pick('string').catch(() => null);
+        const sayContent = await args.pick('string').catch(() => null);
+        if (!sayTitle || !sayContent) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Say Reply')
@@ -35,9 +35,9 @@ module.exports = class SayCommand extends Command {
         // Parse channel args
         let channel = message.channel;
         if (!args.finished) {
-            const channelArg = await args.pickResult('guildTextChannel');
+            const channelArg = await args.pick('guildTextChannel').catch(() => null);
 
-            if (!channelArg.success) {
+            if (!channelArg) {
                 const embed = new BediEmbed()
                                   .setColor(colors.ERROR)
                                   .setTitle('Say Reply')
@@ -45,10 +45,10 @@ module.exports = class SayCommand extends Command {
                                       Formatters.inlineCode(settingsData.prefix + 'say <title> <body> <#channel:optional>')}`);
                 return message.reply({embeds: [embed]});
             }
-            channel = channelArg.value;
+            channel = channelArg;
         }
 
-        let descriptionToSend = sayContent.value;
+        let descriptionToSend = sayContent;
         const BOT_OWNERS = process.env.BOT_OWNERS!.split(',');
         if (!BOT_OWNERS.includes(message.author.id)) {
             // Append the user's @ to the message so that $say messages aren't mistaken for actual bot messages
@@ -59,7 +59,7 @@ module.exports = class SayCommand extends Command {
         await message.delete();
 
         // Send the say command
-        const embed = new BediEmbed().setTitle(sayTitle.value).setDescription(descriptionToSend);
+        const embed = new BediEmbed().setTitle(sayTitle).setDescription(descriptionToSend);
         return channel.send({embeds: [embed]});
     }
 };

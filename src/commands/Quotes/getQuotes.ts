@@ -29,10 +29,10 @@ module.exports = class GetQuotesCommand extends Command {
 
         let quoteAuthor;
 
-        quoteAuthor = await args.pickResult('user');
-        if (!quoteAuthor.success) quoteAuthor = await args.pickResult('string');
+        quoteAuthor = await args.pick('user').catch(() => null);
+        if (!quoteAuthor) quoteAuthor = await args.pickResult('string');
 
-        if (!quoteAuthor.success) {
+        if (!quoteAuthor) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Get Quotes Reply')
@@ -41,7 +41,7 @@ module.exports = class GetQuotesCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        const quotes = await getQuotesFromAuthor(guildId as string, quoteAuthor.value.toString());
+        const quotes = await getQuotesFromAuthor(guildId as string, quoteAuthor.toString());
 
         if (quotes.length === 0) {
             const embed =
@@ -55,10 +55,10 @@ module.exports = class GetQuotesCommand extends Command {
 
         let templateDescription;
 
-        if (typeof quoteAuthor.value === 'string') {
-            templateDescription = `Quotes by ${Formatters.inlineCode(quoteAuthor.value)}`;
+        if (typeof quoteAuthor === 'string') {
+            templateDescription = `Quotes by ${Formatters.inlineCode(quoteAuthor)}`;
         } else {
-            templateDescription = `Quotes by ${quoteAuthor.value}`;
+            templateDescription = `Quotes by ${quoteAuthor}`;
         }
 
         // Creates a PaginatedMessage Object (built into Sapphire framework)

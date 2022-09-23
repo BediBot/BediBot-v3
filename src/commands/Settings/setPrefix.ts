@@ -23,8 +23,8 @@ module.exports = class SetPrefixCommand extends Command {
         const settingsData = await getSettings(guildId as string);
 
         // Check if they even inputted a string
-        const newValue = await args.peekResult('string');
-        if (!newValue.success) {
+        const newValue = await args.peek('string').catch(() => null);
+        if (!newValue) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Set Prefix Reply')
@@ -34,12 +34,12 @@ module.exports = class SetPrefixCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        await settingsModel.updateOne({_id: guildId as string}, {prefix: newValue.value});
+        await settingsModel.updateOne({_id: guildId as string}, {prefix: newValue});
 
         const embed = new BediEmbed()
                           .setTitle('Set Prefix Reply')
                           .setColor(colors.SUCCESS)
-                          .setDescription(`The prefix has been updated to ${Formatters.inlineCode(newValue.value)}`);
+                          .setDescription(`The prefix has been updated to ${Formatters.inlineCode(newValue)}`);
         return message.reply({embeds: [embed]});
     };
 };

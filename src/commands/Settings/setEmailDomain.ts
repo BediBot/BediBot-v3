@@ -23,8 +23,8 @@ module.exports = class SetEmailDomainCommand extends Command {
         const settingsData = await getSettings(guildId as string);
 
         // Check if they even inputted a string
-        const newValue = await args.peekResult('string');
-        if (!newValue.success) {
+        const newValue = await args.peek('string').catch(() => null);
+        if (!newValue) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Set Email Domain Reply')
@@ -34,7 +34,7 @@ module.exports = class SetEmailDomainCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        if (newValue.value.startsWith('@')) {
+        if (newValue.startsWith('@')) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Set Email Domain Reply')
@@ -42,12 +42,12 @@ module.exports = class SetEmailDomainCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        await settingsModel.updateOne({_id: guildId as string}, {emailDomain: newValue.value});
+        await settingsModel.updateOne({_id: guildId as string}, {emailDomain: newValue});
 
         const embed = new BediEmbed()
                           .setTitle('Set Email Domain Reply')
                           .setColor(colors.SUCCESS)
-                          .setDescription(`The email domain has been updated to ${Formatters.inlineCode(newValue.value)}`);
+                          .setDescription(`The email domain has been updated to ${Formatters.inlineCode(newValue)}`);
         return message.reply({embeds: [embed]});
     };
 };

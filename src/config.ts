@@ -2,6 +2,7 @@ import {LogLevel} from '@sapphire/framework';
 import {ClientOptions} from 'discord.js';
 
 import {fetchPrefix} from './utils/discordUtil';
+import {getRandomStatus} from "./utils/statusUtil";
 
 export const DEFAULT_PREFIX = '$';
 export const MAX_QUOTE_LENGTH = 1000;
@@ -14,7 +15,7 @@ export const CLIENT_OPTIONS: ClientOptions = {
     defaultPrefix: DEFAULT_PREFIX,
     caseInsensitiveCommands: true,
     caseInsensitivePrefixes: true,
-    // presence: getRandomStatus(),
+    presence: getRandomStatus(),
     logger: {
         level: LogLevel.Debug,
     },

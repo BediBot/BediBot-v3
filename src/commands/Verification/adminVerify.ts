@@ -32,8 +32,8 @@ module.exports = class AdminVerifyCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        const user = await args.pickResult('user');
-        if (!user.success) {
+        const user = await args.pick('user').catch(() => null);
+        if (!user) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Admin Verify Reply')
@@ -43,12 +43,12 @@ module.exports = class AdminVerifyCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        await addRoleToUser(user.value.id, guild, settingsData.verifiedRole);
-        await addVerifiedUser(user.value.id, guildId as string, 'Admin Verified');
+        await addRoleToUser(user.id, guild, settingsData.verifiedRole);
+        await addVerifiedUser(user.id, guildId as string, 'Admin Verified');
         const embed = new BediEmbed()
                           .setTitle('Admin Verify Reply')
                           .setColor(colors.SUCCESS)
-                          .setDescription(`${user.value} has been verified.`);
+                          .setDescription(`${user} has been verified.`);
         return message.reply({embeds: [embed]});
     }
 };

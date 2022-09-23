@@ -22,8 +22,8 @@ module.exports = class UnlockCommand extends Command {
         const settingsData = await getSettings(guildId as string);
 
         // Check if they even inputted a string
-        const roleString = await args.peekResult('string');
-        if (!roleString.success) {
+        const roleString = await args.peek('string').catch(() => null);
+        if (!roleString) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Unlock Reply')
@@ -33,8 +33,8 @@ module.exports = class UnlockCommand extends Command {
         }
 
         // Check if the string is a valid role
-        const role = await args.pickResult('role');
-        if (!role.success) {
+        const role = await args.pick('role').catch(() => null);
+        if (!role) {
             const embed =
                 new BediEmbed().setColor(colors.ERROR).setTitle('Unlock Reply').setDescription('That is not a valid role.');
             return message.reply({embeds: [embed]});
@@ -43,20 +43,20 @@ module.exports = class UnlockCommand extends Command {
         // This should never return due to the GuildOnly precondition
         if (!(message.channel instanceof GuildChannel)) return;
 
-        await message.channel.permissionOverwrites.edit(role.value, {SEND_MESSAGES: true});
+        await message.channel.permissionOverwrites.edit(role, {SEND_MESSAGES: true});
 
         // Remove old jobs
         await agenda.cancel({
             'name': UNLOCK_JOB_NAME,
             'data.guildId': guildId,
             'data.channelId': channelId,
-            'data.roleId': role.value.id,
+            'data.roleId': role.id,
         });
 
         const embed = new BediEmbed()
                           .setTitle('Unlock Reply')
                           .setColor(colors.SUCCESS)
-                          .setDescription(`Channel has been unlocked for ${role.value.toString()}`);
+                          .setDescription(`Channel has been unlocked for ${role.toString()}`);
         return message.reply({embeds: [embed]});
     }
 };

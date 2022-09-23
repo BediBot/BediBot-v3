@@ -46,8 +46,8 @@ module.exports = class VerifyCommand extends Command {
             return message.author.send({embeds: [embed]});
         }
 
-        const emailAddress = await args.pickResult('string');
-        if (!emailAddress.success) {
+        const emailAddress = await args.pick('string').catch(() => null);
+        if (!emailAddress) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Verify Reply')
@@ -57,7 +57,7 @@ module.exports = class VerifyCommand extends Command {
             return message.channel.send({embeds: [embed]});
         }
 
-        if (!(isEmailValid(emailAddress.value) && emailAddress.value.endsWith(settingsData.emailDomain))) {
+        if (!(isEmailValid(emailAddress) && emailAddress.endsWith(settingsData.emailDomain))) {
             const embed =
                 new BediEmbed()
                     .setColor(colors.ERROR)
@@ -67,7 +67,7 @@ module.exports = class VerifyCommand extends Command {
             return message.channel.send({embeds: [embed]});
         }
 
-        if (await emailAddressLinkedToUser(emailAddress.value, guildId as string)) {
+        if (await emailAddressLinkedToUser(emailAddress, guildId as string)) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Verify Reply')
@@ -75,7 +75,7 @@ module.exports = class VerifyCommand extends Command {
             return message.channel.send({embeds: [embed]});
         }
 
-        if (await emailAddressLinkedToPendingVerificationUser(emailAddress.value)) {
+        if (await emailAddressLinkedToPendingVerificationUser(emailAddress)) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Verify Reply')
@@ -84,7 +84,7 @@ module.exports = class VerifyCommand extends Command {
         }
 
         const uniqueKey = createUniqueKey();
-        const response = await sendConfirmationEmail(emailAddress.value, guild!.name, settingsData.prefix, uniqueKey);
+        const response = await sendConfirmationEmail(emailAddress, guild!.name, settingsData.prefix, uniqueKey);
 
         if (Object.prototype.toString.call(response) === '[object Error]') {
             const embed = new BediEmbed()
@@ -95,7 +95,7 @@ module.exports = class VerifyCommand extends Command {
         }
 
         await addPendingVerificationUser(
-            author.id, guildId as string, await hashString(emailAddress.value.substring(0, emailAddress.value.indexOf('@'))),
+            author.id, guildId as string, await hashString(emailAddress.substring(0, emailAddress.indexOf('@'))),
             uniqueKey);
 
         const serverReplyEmbed = new BediEmbed()
@@ -108,7 +108,7 @@ module.exports = class VerifyCommand extends Command {
                           .setTitle('Verify Reply')
                           .setColor(colors.ACTION)
                           .setDescription(
-                              'Verification Email Sent to `' + emailAddress.value +
+                              'Verification Email Sent to `' + emailAddress +
                               '`\nCheck your email (and spam folder if it does not show up in your inbox) and run `' +
                               settingsData.prefix + 'confirm <uniqueKey>` to complete verification.');
         return message.author.send({embeds: [embed]});

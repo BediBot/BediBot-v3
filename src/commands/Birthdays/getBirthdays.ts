@@ -29,15 +29,15 @@ module.exports = class GetBirthdays extends Command {
         const settingsData = await getSettings(guildId as string);
 
         let month;
-        month = await args.pickResult('integer');
-        if (!month.success) month = await args.pickResult('string');
+        month = await args.pick('integer').catch(() => null);
+        if (!month) month = await args.pick('string').catch(() => null);
 
         let birthdays;
         let singleMonth = false;
-        if (!month.success)
+        if (!month)
             birthdays = await getAllBirthdays();
         else {
-            month = isValidMonth(month.value);
+            month = isValidMonth(month);
 
             if (!month) {
                 const embed = new BediEmbed()

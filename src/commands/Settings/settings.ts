@@ -33,11 +33,11 @@ module.exports = class SettingsCommand extends Command {
 
         let settingsData = await getSettings(guildId as string);
 
-        const module = await args.restResult('string');
+        const module = await args.rest('string').catch(() => null);
 
         const embed = new BediEmbed().setTitle('Settings Reply');
 
-        if (!module.success) {
+        if (!module) {
             embed
                 .setDescription(
                     'Run `' + settingsData.prefix + 'settings <module>' +
@@ -50,10 +50,10 @@ module.exports = class SettingsCommand extends Command {
                 .addField('Prefix', '`' + settingsData.prefix + '`', false)
                 .addField('Timezone', '`' + settingsData.timezone + '`', false);
         } else {
-            embed.setDescription('Here are the settings for the `' + capFirstLetterEveryWord(module.value) + '` module');
+            embed.setDescription('Here are the settings for the `' + capFirstLetterEveryWord(module) + '` module');
 
             // Add settings to the cases below as they are implemented
-            switch (module.value.toLowerCase()) {
+            switch (module.toLowerCase()) {
                 case 'verification':
                     embed.addField('Verification Enabled', '`' + settingsData.verificationEnabled + '`', false)
                         .addField('Email Domain', '`' + settingsData.emailDomain + '`', false)

@@ -29,8 +29,8 @@ module.exports = class AddQuoteCommand extends Command {
         const {guild, guildId, author} = message;
         const settingsData = await getSettings(guildId as string);
 
-        let quote: string|Result<string, UserError>;
-        let quoteAuthor: Result<string, UserError>|Result<User, UserError>;
+        let quote: string| null;
+        let quoteAuthor: User | string | null;
 
         if (message.reference) {
             // This implies that this is a reply
@@ -43,10 +43,10 @@ module.exports = class AddQuoteCommand extends Command {
                                       `Please ensure that the message you're replying to contains text content (i.e. No embeds)`);
                 return message.reply({embeds: [embed]});
             }
-            quoteAuthor = await args.pickResult('user');
-            if (!quoteAuthor.success) quoteAuthor = await args.pickResult('string');
+            quoteAuthor = await args.pick('user').catch(() => null);
+            if (!quoteAuthor) quoteAuthor = await args.pick('string').catch(() => null);
 
-            if (!quoteAuthor.success) {
+            if (!quoteAuthor) {
                 const embed = new BediEmbed()
                                   .setColor(colors.ERROR)
                                   .setTitle('Add Quote Reply')
@@ -55,11 +55,11 @@ module.exports = class AddQuoteCommand extends Command {
                 return message.reply({embeds: [embed]});
             }
         } else {
-            quote = await args.pickResult('string');
-            quoteAuthor = await args.pickResult('user');
-            if (!quoteAuthor.success) quoteAuthor = await args.pickResult('string');
+            quote = await args.pick('string').catch(() => null);
+            quoteAuthor = await args.pick('user').catch(() => null);
+            if (!quoteAuthor) quoteAuthor = await args.pick('string').catch(() => null);
 
-            if (!quote.success || !quoteAuthor.success) {
+            if (!quote || !quoteAuthor) {
                 const embed = new BediEmbed()
                                   .setColor(colors.ERROR)
                                   .setTitle('Add Quote Reply')
@@ -67,7 +67,6 @@ module.exports = class AddQuoteCommand extends Command {
                                       Formatters.inlineCode(settingsData.prefix + 'addQuote <quote> <author>')}`);
                 return message.reply({embeds: [embed]});
             }
-            quote = quote.value;
         }
 
         if (quote.length === 0) {
@@ -96,12 +95,12 @@ module.exports = class AddQuoteCommand extends Command {
         let displayQuote = quote;
         if (!displayQuote.includes('<')) displayQuote = Formatters.inlineCode(quote);
 
-        if (typeof quoteAuthor.value === 'string') {
+        if (typeof quoteAuthor === 'string') {
             embed.setDescription(
-                `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor.value as string)}\nDate: <t:${
+                `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
                     Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
         } else {
-            embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor.value}\nDate: <t:${
+            embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
                 Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
         }
 
@@ -144,12 +143,12 @@ module.exports = class AddQuoteCommand extends Command {
                         .setColor(colors.ACTION)
                         .setTitle(`Add Quote Reply - Approvals: ${numApprovals}/${settingsData.quoteApprovalsRequired}`);
 
-                if (typeof quoteAuthor.value === 'string') {
+                if (typeof quoteAuthor === 'string') {
                     embed.setDescription(
-                        `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor.value as string)}\nDate: <t:${
+                        `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
                             Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
                 } else {
-                    embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor.value}\nDate: <t:${
+                    embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
                         Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
                 }
 
@@ -157,16 +156,16 @@ module.exports = class AddQuoteCommand extends Command {
             } else {
                 const embed = new BediEmbed().setColor(colors.SUCCESS).setTitle('Add Quote Reply - Approved');
 
-                if (typeof quoteAuthor.value === 'string') {
+                if (typeof quoteAuthor === 'string') {
                     embed.setDescription(
-                        `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor.value as string)}\nDate: <t:${
+                        `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
                             Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
                 } else {
-                    embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor.value}\nDate: <t:${
+                    embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
                         Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
                 }
 
-                await addQuote(interaction.guildId as string, quote as string, quoteAuthor.value!.toString(), date);
+                await addQuote(interaction.guildId as string, quote as string, quoteAuthor!.toString(), date);
 
                 await message.edit({
                     embeds: [embed],

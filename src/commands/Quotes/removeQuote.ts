@@ -23,14 +23,14 @@ module.exports = class RemoveQuoteCommand extends Command {
         const {guildId, author} = message;
         const settingsData = await getSettings(guildId as string);
 
-        const quote = await args.pickResult('string');
+        const quote = await args.pick('string').catch(() => null);
 
         let quoteAuthor;
 
-        quoteAuthor = await args.pickResult('user');
-        if (!quoteAuthor.success) quoteAuthor = await args.pickResult('string');
+        quoteAuthor = await args.pick('user').catch(() => null);
+        if (!quoteAuthor) quoteAuthor = await args.pick('string').catch(() => null);
 
-        if (!quote.success || !quoteAuthor.success) {
+        if (!quote || !quoteAuthor) {
             const embed = new BediEmbed()
                               .setColor(colors.ERROR)
                               .setTitle('Remove Quote Reply')
@@ -39,7 +39,7 @@ module.exports = class RemoveQuoteCommand extends Command {
             return message.reply({embeds: [embed]});
         }
 
-        const response = await removeQuote(guildId as string, quote.value, quoteAuthor.value.toString());
+        const response = await removeQuote(guildId as string, quote, quoteAuthor.toString());
 
         if (!response) {
             const embed =
@@ -49,21 +49,21 @@ module.exports = class RemoveQuoteCommand extends Command {
 
         const embed = new BediEmbed().setTitle('Remove Quote Reply');
 
-        if (typeof quoteAuthor.value === 'string') {
+        if (typeof quoteAuthor === 'string') {
             if (response.date)
-                embed.setDescription(`Quote: ${Formatters.inlineCode(quote.value)}\nAuthor: ${
-                    Formatters.inlineCode(quoteAuthor.value as string)}\nDate: <t:${
+                embed.setDescription(`Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${
+                    Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
                     Math.round(response.date.valueOf() / 1000)}:f>\nRemoved By: ${author}`);
             else
-                embed.setDescription(`Quote: ${Formatters.inlineCode(quote.value)}\nAuthor: ${
-                    Formatters.inlineCode(quoteAuthor.value as string)}\nRemoved By: ${author}`);
+                embed.setDescription(`Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${
+                    Formatters.inlineCode(quoteAuthor as string)}\nRemoved By: ${author}`);
         } else {
             if (response.date)
-                embed.setDescription(`Quote: ${Formatters.inlineCode(quote.value)}\nAuthor: ${quoteAuthor.value}\nDate: <t:${
+                embed.setDescription(`Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${quoteAuthor}\nDate: <t:${
                     Math.round(response.date.valueOf() / 1000)}:f>\nRemoved By: ${author}`);
             else
                 embed.setDescription(
-                    `Quote: ${Formatters.inlineCode(quote.value)}\nAuthor: ${quoteAuthor.value}\nRemoved By: ${author}`);
+                    `Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${quoteAuthor}\nRemoved By: ${author}`);
         }
 
         return message.reply({embeds: [embed]});
