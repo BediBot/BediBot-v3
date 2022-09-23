@@ -1,6 +1,7 @@
 import {Args, PieceContext, Result, UserError} from '@sapphire/framework';
 import {Formatters, Message, MessageActionRow, MessageButton, Snowflake, User} from 'discord.js';
 import moment from 'moment-timezone/moment-timezone-utils';
+import {Command} from '@sapphire/framework';
 
 import {MAX_QUOTE_LENGTH} from '../../config';
 import {addQuote} from '../../database/models/QuoteModel';
@@ -9,7 +10,7 @@ import {BediEmbed} from '../../lib/BediEmbed';
 import colors from '../../utils/colorUtil';
 import logger from '../../utils/loggerUtil';
 
-const {Command} = require('@sapphire/framework');
+const initialEmbed = new BediEmbed().setTitle('Ping?');
 
 const TITLE_BEFORE_NUM_APPROVALS = 'Add Quote Reply - Approvals: ';
 
@@ -23,6 +24,37 @@ module.exports = class AddQuoteCommand extends Command {
             detailedDescription: 'addQuote <quote> <author>`' +
                 '\nThis command supports both regular names and mentions for the author parameter.',
         });
+    }
+
+    public override registerApplicationCommands(registry: Command.Registry) {
+        registry.registerChatInputCommand({
+            name: this.name,
+            description: this.description,
+            options: [
+                {
+                    name: 'quote',
+                    description: 'The quote you want to add',
+                    type: 'STRING',
+                    required: true,
+                },
+                {
+                    name: 'author',
+                    description: 'The author of the quote',
+                    type: 'USER',
+                    required: true,
+                },
+            ],
+        });
+    }
+
+    public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
+
+        const msg = await interaction.reply({embeds: [initialEmbed], fetchReply: true});
+
+        const editEmbed = new BediEmbed().setTitle('Test!').setDescription(`test`);
+
+        return await interaction.editReply({embeds: [editEmbed]});
+
     }
 
     async messageRun(message: Message, args: Args) {
