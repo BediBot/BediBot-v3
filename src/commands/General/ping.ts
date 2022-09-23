@@ -8,12 +8,19 @@ import logger from '../../utils/loggerUtil';
 
 const initialEmbed = new BediEmbed().setTitle('Ping?');
 
-@ApplyOptions
-<Command.Options>({description: 'Send back the ping of the bot'}) export class UserCommand extends Command {
+export class UserCommand extends Command {
+    public constructor(context: Command.Context, options: Command.Options) {
+        super(context, {
+            ...options,
+            name: 'Ping',
+            description: 'Pings the Bot'
+        });
+    }
+
     public override registerApplicationCommands(registry: Command.Registry) {
         registry.registerChatInputCommand({name: this.name, description: this.description});
-        registry.registerContextMenuCommand({name: this.name, type: 'MESSAGE'});
-        registry.registerContextMenuCommand({name: this.name, type: 'USER'});
+        registry.registerContextMenuCommand({name: 'Ping', type: 'MESSAGE'});
+        registry.registerContextMenuCommand({name: 'Ping', type: 'USER'});
     }
 
     public async messageRun(message: Message) {
