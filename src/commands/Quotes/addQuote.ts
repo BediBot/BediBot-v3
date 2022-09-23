@@ -40,7 +40,7 @@ module.exports = class AddQuoteCommand extends Command {
                 {
                     name: 'author',
                     description: 'The author of the quote',
-                    type: 'USER',
+                    type: 'STRING',
                     required: true,
                 },
             ],
