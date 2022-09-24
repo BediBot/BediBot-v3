@@ -1,11 +1,9 @@
-import {Args, PieceContext} from '@sapphire/framework';
-import {Formatters, Message} from 'discord.js';
+import {Args, Command, PieceContext} from '@sapphire/framework';
+import {Formatters, Message, TextBasedChannel, TextChannel} from 'discord.js';
 
 import {getSettings} from '../../database/models/SettingsModel';
 import {BediEmbed} from '../../lib/BediEmbed';
 import colors from '../../utils/colorUtil';
-
-const {Command} = require('@sapphire/framework');
 
 module.exports = class SayCommand extends Command {
     constructor(context: PieceContext) {
@@ -15,6 +13,48 @@ module.exports = class SayCommand extends Command {
             preconditions: ['GuildOnly', ['BotOwnerOnly', 'AdminOnly']],
             detailedDescription: 'say <title> <body> <#channel:optional>`',
         });
+    }
+
+    public override registerApplicationCommands(registry: Command.Registry) {
+        registry.registerChatInputCommand({
+            name: this.name,
+            description: this.description,
+            options: [
+                {name: 'title', description: 'Title of the message', type: 'STRING', required: true},
+                {name: 'body', description: 'Body of the message', type: 'STRING', required: true},
+                {name: 'channel', description: 'Channel to send the message to', type: 'CHANNEL', required: false}
+            ]
+        });
+    }
+
+    async chatInputRun(interaction: Command.ChatInputInteraction) {
+        const {guildId} = interaction;
+        const settingsData = await getSettings(guildId as string);
+
+        // Pick the title and content from args, return error if invalid
+        const sayTitle = interaction.options.getString('title', true);
+        const sayContent = interaction.options.getString('body', true);
+
+        // Parse channel args
+        let channel: TextBasedChannel|null = interaction.options.getChannel('channel') as TextBasedChannel | null;
+        if (!channel) {
+            channel = interaction.channel;
+        }
+
+        let descriptionToSend = sayContent;
+        const BOT_OWNERS = process.env.BOT_OWNERS!.split(',');
+        if (!BOT_OWNERS.includes(interaction.user.id)) {
+            // Append the user's @ to the message so that $say messages aren't mistaken for actual bot messages
+            descriptionToSend = descriptionToSend!.concat('\n\nMessage created by ' + interaction.user);
+        }
+
+        // Send the say command
+        const embed = new BediEmbed().setTitle(sayTitle).setDescription(descriptionToSend);
+        channel!.send({embeds: [embed]});
+
+        const replyEmbed = new BediEmbed().setTitle('Say Reply').setDescription('Your message has been sent!');
+
+        return interaction.reply({embeds: [replyEmbed], ephemeral: true});
     }
 
     async messageRun(message: Message, args: Args) {
