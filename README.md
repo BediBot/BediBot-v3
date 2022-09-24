@@ -36,7 +36,7 @@ Do NOT commit to main under any circumstances.
 
 ## Contributors
 
-Active Developers: Aadi Chaudhary, Sahil Kale, Zayd Tahir
+Active Developers: Zayd Tahir, Sahil Kale
 
 Additional Contributors: Carson Bay, Leo Gabriel, Joe Ma
 
