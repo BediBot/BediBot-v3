@@ -15,8 +15,6 @@ module.exports = class PingCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry) {
         registry.registerChatInputCommand({name: this.name, description: this.description});
-        registry.registerContextMenuCommand({name: 'Ping', type: 'MESSAGE'});
-        registry.registerContextMenuCommand({name: 'Ping', type: 'USER'});
     }
 
     public async messageRun(message: Message) {
@@ -32,18 +30,7 @@ module.exports = class PingCommand extends Command {
     }
 
     public async chatInputRun(interaction: Command.ChatInputInteraction) {
-        const msg = await interaction.reply({embeds: [initialEmbed], fetchReply: true});
-
-        const createdTime = msg instanceof Message ? msg.createdTimestamp : Date.parse(msg.timestamp);
-
-        const editEmbed = new BediEmbed().setTitle('Pong!').setDescription(`Bot Latency ${
-            Math.round(this.container.client.ws.ping)}ms. API Latency ${createdTime - interaction.createdTimestamp}ms.`);
-
-        return await interaction.editReply({embeds: [editEmbed]});
-    }
-
-    public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
-        const msg = await interaction.reply({embeds: [initialEmbed], fetchReply: true});
+        const msg = await interaction.reply({embeds: [initialEmbed], fetchReply: true, ephemeral: true});
 
         const createdTime = msg instanceof Message ? msg.createdTimestamp : Date.parse(msg.timestamp);
 
