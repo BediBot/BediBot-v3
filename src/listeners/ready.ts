@@ -1,7 +1,8 @@
-import { Listener } from '@sapphire/framework';
-import logger from "../utils/loggerUtil";
-import {connectDatabase} from "../database/connectDatabase";
-import {startAgenda} from "../utils/schedulerUtil";
+import {Listener} from '@sapphire/framework';
+
+import {connectDatabase} from '../database/connectDatabase';
+import logger from '../utils/loggerUtil';
+import {startAgenda} from '../utils/schedulerUtil';
 
 module.exports = class ReadyListener extends Listener {
     public constructor(context: Listener.Context, options: Listener.Options) {

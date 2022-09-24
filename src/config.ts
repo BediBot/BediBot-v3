@@ -2,7 +2,7 @@ import {LogLevel} from '@sapphire/framework';
 import {ClientOptions} from 'discord.js';
 
 import {fetchPrefix} from './utils/discordUtil';
-import {getRandomStatus} from "./utils/statusUtil";
+import {getRandomStatus} from './utils/statusUtil';
 
 export const DEFAULT_PREFIX = '$';
 export const MAX_QUOTE_LENGTH = 1000;

@@ -51,9 +51,9 @@ module.exports = class RemoveQuoteCommand extends Command {
 
         if (typeof quoteAuthor === 'string') {
             if (response.date)
-                embed.setDescription(`Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${
-                    Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
-                    Math.round(response.date.valueOf() / 1000)}:f>\nRemoved By: ${author}`);
+                embed.setDescription(
+                    `Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
+                        Math.round(response.date.valueOf() / 1000)}:f>\nRemoved By: ${author}`);
             else
                 embed.setDescription(`Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${
                     Formatters.inlineCode(quoteAuthor as string)}\nRemoved By: ${author}`);
@@ -62,8 +62,7 @@ module.exports = class RemoveQuoteCommand extends Command {
                 embed.setDescription(`Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${quoteAuthor}\nDate: <t:${
                     Math.round(response.date.valueOf() / 1000)}:f>\nRemoved By: ${author}`);
             else
-                embed.setDescription(
-                    `Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${quoteAuthor}\nRemoved By: ${author}`);
+                embed.setDescription(`Quote: ${Formatters.inlineCode(quote)}\nAuthor: ${quoteAuthor}\nRemoved By: ${author}`);
         }
 
         return message.reply({embeds: [embed]});

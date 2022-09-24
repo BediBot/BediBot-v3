@@ -45,10 +45,8 @@ module.exports = class AdminVerifyCommand extends Command {
 
         await addRoleToUser(user.id, guild, settingsData.verifiedRole);
         await addVerifiedUser(user.id, guildId as string, 'Admin Verified');
-        const embed = new BediEmbed()
-                          .setTitle('Admin Verify Reply')
-                          .setColor(colors.SUCCESS)
-                          .setDescription(`${user} has been verified.`);
+        const embed =
+            new BediEmbed().setTitle('Admin Verify Reply').setColor(colors.SUCCESS).setDescription(`${user} has been verified.`);
         return message.reply({embeds: [embed]});
     }
 };

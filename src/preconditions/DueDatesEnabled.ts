@@ -1,5 +1,6 @@
 import {Precondition} from '@sapphire/framework';
 import {Message} from 'discord.js';
+
 import {getSettings} from '../database/models/SettingsModel';
 
 module.exports = class DueDatesEnabledPrecondition extends Precondition {

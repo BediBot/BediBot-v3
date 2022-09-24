@@ -95,8 +95,7 @@ module.exports = class VerifyCommand extends Command {
         }
 
         await addPendingVerificationUser(
-            author.id, guildId as string, await hashString(emailAddress.substring(0, emailAddress.indexOf('@'))),
-            uniqueKey);
+            author.id, guildId as string, await hashString(emailAddress.substring(0, emailAddress.indexOf('@'))), uniqueKey);
 
         const serverReplyEmbed = new BediEmbed()
                                      .setTitle('Verify Reply')

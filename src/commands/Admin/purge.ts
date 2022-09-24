@@ -1,5 +1,6 @@
 import {Args, PieceContext} from '@sapphire/framework';
 import {Formatters, Message} from 'discord.js';
+
 import {getSettings} from '../../database/models/SettingsModel';
 import {BediEmbed} from '../../lib/BediEmbed';
 import colors from '../../utils/colorUtil';

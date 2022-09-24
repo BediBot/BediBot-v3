@@ -18,7 +18,6 @@ module.exports = class HelpCommand extends Command {
     }
 
     async messageRun(message: Message, args: Args) {
-
         const prefix = (await fetchPrefix(message))[0];
 
         const selectedCommand = await args.pick('string').catch(() => null);
