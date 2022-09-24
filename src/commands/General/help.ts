@@ -1,5 +1,5 @@
 import {Args, Command, CommandStore, PieceContext, PreconditionContainerArray} from '@sapphire/framework';
-import {Formatters, Message, MessageActionRow, MessageSelectMenu, Permissions} from 'discord.js';
+import {Formatters, Guild, Message, MessageActionRow, MessageSelectMenu, Permissions} from 'discord.js';
 
 import {BediEmbed} from '../../lib/BediEmbed';
 import colors from '../../utils/colorUtil';
@@ -43,46 +43,10 @@ module.exports = class HelpCommand extends Command {
         const selectedCommand = await args.pick('string').catch(() => null);
 
         if (!selectedCommand || !this.store.has((selectedCommand.toLowerCase()))) {
-            const helpPages = new Map();
 
-            const selectMenu = new MessageSelectMenu().setCustomId('helpSelect').setPlaceholder('Select a Category');
-
-            for (const category of this.store.categories) {
-                if (category === 'Owner') continue;
-
-                const embed = new BediEmbed()
-                                  .setTitle('Help Reply - ' + category)
-                                  .setDescription(`To get more detailed information about a command, type ${
-                                      Formatters.inlineCode(`${prefix}help <commandName>`)}`);
-
-                let fieldValue = '';
-
-                for (const command of this.store as CommandStore) {
-                    let skip = false;
-                    if (message.guild && !message.member?.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
-                        for (const preconditionContainer of command[1].preconditions.entries) {
-                            if (preconditionContainer instanceof PreconditionContainerArray &&
-                                preconditionContainer.entries.find((precondition: any) => precondition.name === 'AdminOnly'))
-                                skip = true;
-                        }
-                    }
-
-                    if (skip) continue;
-
-                    if (command[1].category === category)
-                        embed.addField(`${prefix}${command[1].name}`, command[1].description, false);
-                }
-                if (embed.fields.length === 0) continue;
-
-                selectMenu.addOptions([
-                    {
-                        label: category,
-                        value: category,
-                    },
-                ]);
-                helpPages.set(category, embed);
-            }
-
+            //Call generate help pages and store returntypes
+            let [helpPages, selectMenu] = this.generateHelpPages(message.guild, message.member?.permissions.has(Permissions.FLAGS.ADMINISTRATOR))
+            
             const selectRow = new MessageActionRow().addComponents(selectMenu);
 
             if (message.guild) {
@@ -146,5 +110,51 @@ module.exports = class HelpCommand extends Command {
                 embeds: [embed],
             });
         }
+    }
+
+    private generateHelpPages(guild: Guild | null, is_admin: boolean | undefined)
+    {
+        const helpPages = new Map();
+
+            const selectMenu = new MessageSelectMenu().setCustomId('helpSelect').setPlaceholder('Select a Category');
+
+            for (const category of this.store.categories) {
+                if (category === 'Owner') continue;
+
+                const embed = new BediEmbed()
+                                  .setTitle('Help Reply - ' + category)
+                                  .setDescription(`To get more detailed information about a command, type ${
+                                      Formatters.inlineCode(`/help <commandName>`)}`);
+
+                let fieldValue = '';
+
+                for (const command of this.store as CommandStore) {
+                    let skip = false;
+                    if (guild && !is_admin) {
+                        for (const preconditionContainer of command[1].preconditions.entries) {
+                            if (preconditionContainer instanceof PreconditionContainerArray &&
+                                preconditionContainer.entries.find((precondition: any) => precondition.name === 'AdminOnly'))
+                                skip = true;
+                        }
+                    }
+
+                    if (skip) continue;
+
+                    if (command[1].category === category)
+                        embed.addField(`/{command[1].name}`, command[1].description, false);
+                }
+                if (embed.fields.length === 0) continue;
+
+                selectMenu.addOptions([
+                    {
+                        label: category,
+                        value: category,
+                    },
+                ]);
+                helpPages.set(category, embed);
+            }
+
+        return [helpPages, selectMenu];
+        
     }
 };
