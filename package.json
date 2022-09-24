@@ -7,8 +7,8 @@
     "prestart": "tsc",
     "start": "node -r dotenv/config ./prod/index.js",
     "watch:start": "tsc-watch --onSuccess \"node -r dotenv/config ./prod/index.js\"",
-    "test": "jest ./prod --reporters=default --reporters=jest-junit --detectOpenHandles --coverage --passWithNoTests",
-    "test:ci": "jest --ci ./prod --reporters=default --reporters=jest-junit --passWithNoTests"
+    "test": "jest ./prod --reporters=default --reporters=jest-junit --detectOpenHandles --coverage",
+    "test:ci": "jest --ci ./prod --reporters=default --reporters=jest-junit"
   },
   "repository": {
     "type": "git",
