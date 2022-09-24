@@ -4,7 +4,11 @@ import SettingsModel, {defaultSettings, getSettings} from '../../database/models
 
 describe('Settings DB', () => {
     beforeAll(async () => {
-        await mongoose.connect(process.env.MONGO_URL + 'settings' as string);
+        await mongoose.connect(process.env.MONGO_URL + 'settings' as string, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useFindAndModify: false,
+        });
     });
 
     afterEach(async () => {
