@@ -1,11 +1,10 @@
-import {Args, CommandStore, PieceContext, PreconditionContainerArray} from '@sapphire/framework';
+import {Args, Command, CommandStore, PieceContext, PreconditionContainerArray} from '@sapphire/framework';
 import {Formatters, Message, MessageActionRow, MessageSelectMenu, Permissions} from 'discord.js';
 
 import {BediEmbed} from '../../lib/BediEmbed';
 import colors from '../../utils/colorUtil';
 import {fetchPrefix} from '../../utils/discordUtil';
 
-const {Command} = require('@sapphire/framework');
 const DEFAULT_PAGE = 'General';
 
 module.exports = class HelpCommand extends Command {
@@ -16,6 +15,27 @@ module.exports = class HelpCommand extends Command {
             detailedDescription: 'help`',
         });
     }
+
+    public override registerApplicationCommands(registry: Command.Registry)
+    {
+        registry.registerChatInputCommand({
+            name: this.name,
+            description: this.description,
+            options : [
+                {
+                    name: 'command',
+                    description: 'The command you want to get more information about',
+                    type: 'STRING',
+                    required: false,
+                }
+            ]
+        });
+    }
+
+    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+
+    }
+    
 
     async messageRun(message: Message, args: Args) {
         const prefix = (await fetchPrefix(message))[0];
