@@ -80,12 +80,16 @@ module.exports = class AddQuoteCommand extends Command {
             new MessageButton().setCustomId('QuoteApprove').setLabel('Approve').setStyle('SUCCESS'),
         );
 
-        const response = await interaction.reply({
+        await interaction.reply({
             embeds: [embed],
             components: [row],
         });
 
-        await this.setupQuoteCollector(response, quoteAuthor, author, quote, date, guildId as String);
+        const response = await interaction.fetchReply();
+
+        if (response instanceof Message) {
+            await this.setupQuoteCollector(response, quoteAuthor, author, quote, date, guildId as string);
+        }
     }
 
     public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
