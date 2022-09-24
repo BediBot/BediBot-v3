@@ -1,5 +1,6 @@
 import {Precondition} from '@sapphire/framework';
-import {Message, ContextMenuInteraction, CommandInteraction} from 'discord.js';
+import {CommandInteraction, ContextMenuInteraction, Message} from 'discord.js';
+
 import {getSettings} from '../database/models/SettingsModel';
 
 export class QuotesEnabledPrecondition extends Precondition {
@@ -12,8 +13,7 @@ export class QuotesEnabledPrecondition extends Precondition {
         return this.error({message: 'Quotes are not enabled on this server!'});
     }
 
-    public override async chatInputRun(interaction: CommandInteraction)
-    {
+    public override async chatInputRun(interaction: CommandInteraction) {
         const {guildId, user} = interaction;
 
         const settingsData = await getSettings(guildId as string);
@@ -34,6 +34,6 @@ export class QuotesEnabledPrecondition extends Precondition {
 
 declare module '@sapphire/framework' {
     interface Preconditions {
-      QuotesEnabled: never;
+        QuotesEnabled: never;
     }
-  }
+}

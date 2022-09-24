@@ -1,9 +1,9 @@
-import type { Events, MessageCommandDeniedPayload } from '@sapphire/framework';
-import { Listener, UserError } from '@sapphire/framework';
-import {Formatters, Guild} from "discord.js";
-import settingsModel, {getSettings} from "../database/models/SettingsModel";
-import {BediEmbed} from "../lib/BediEmbed";
-import colors from "../utils/colorUtil";
+import type {Events, MessageCommandDeniedPayload} from '@sapphire/framework';
+import {Listener, UserError} from '@sapphire/framework';
+import {Formatters, Guild} from 'discord.js';
+import settingsModel, {getSettings} from '../database/models/SettingsModel';
+import {BediEmbed} from '../lib/BediEmbed';
+import colors from '../utils/colorUtil';
 
 module.exports = class GuildCreateListener extends Listener<typeof Events.GuildCreate> {
     public async run(guild: Guild) {
@@ -32,21 +32,21 @@ Then, run ${Formatters.inlineCode(settingsData.prefix + 'displayDueDates <catego
                     'Verification',
                     `To set up verification, first set up the email domain and verified role (see ${
                         Formatters.inlineCode(settingsData.prefix + 'help')} for commands).\n` +
-                    `Then, run ${Formatters.inlineCode(settingsData.prefix + 'toggleModules')} to enable verification.`)
+                        `Then, run ${Formatters.inlineCode(settingsData.prefix + 'toggleModules')} to enable verification.`)
                 .addField(
                     'Morning Announcements',
                     `Morning announcements will send a morning message with a random quote from your guild at a set time.\n` +
-                    `Run ${
-                        Formatters.inlineCode(
-                            settingsData.prefix + 'morningAnnouncement <time>')} in a channel to set them up.`)
+                        `Run ${
+                            Formatters.inlineCode(
+                                settingsData.prefix + 'morningAnnouncement <time>')} in a channel to set them up.`)
                 .addField(
                     'Birthday Announcements',
                     `Birthday announcements will send a birthday message containing all the users who have birthdays that day at a set time. ` +
-                    `It can also give those users a special role for a day if you choose.\n` +
-                    `Run ${
-                        Formatters.inlineCode(
-                            settingsData.prefix +
-                            'birthdayAnnouncement <time> <role:optional>')} in a channel to set them up.`);
+                        `It can also give those users a special role for a day if you choose.\n` +
+                        `Run ${
+                            Formatters.inlineCode(
+                                settingsData.prefix +
+                                'birthdayAnnouncement <time> <role:optional>')} in a channel to set them up.`);
         return channel?.send({embeds: [embed]});
     }
 }

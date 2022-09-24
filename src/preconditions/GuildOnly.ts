@@ -1,5 +1,5 @@
 import {Precondition} from '@sapphire/framework';
-import {Message, CommandInteraction, ContextMenuInteraction} from 'discord.js';
+import {CommandInteraction, ContextMenuInteraction, Message} from 'discord.js';
 
 module.exports = class GuildPrecondition extends Precondition {
     public messageRun(message: Message) {
@@ -16,5 +16,4 @@ module.exports = class GuildPrecondition extends Precondition {
         if (interaction.guild) return this.ok();
         return this.error({message: 'This command can only be used in guilds.'});
     }
-    
 }

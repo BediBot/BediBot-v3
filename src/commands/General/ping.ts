@@ -10,11 +10,7 @@ const initialEmbed = new BediEmbed().setTitle('Ping?');
 
 module.exports = class PingCommand extends Command {
     public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'ping',
-            description: 'Pings the Bot'
-        });
+        super(context, {...options, name: 'ping', description: 'Pings the Bot'});
     }
 
     public override registerApplicationCommands(registry: Command.Registry) {

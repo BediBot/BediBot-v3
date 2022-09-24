@@ -1,14 +1,17 @@
-//Take in response and set up collector
-import {Formatters, Message, User} from "discord.js";
-import {getSettings} from "../database/models/SettingsModel";
-import {BediEmbed} from "../lib/BediEmbed";
-import colors from "./colorUtil";
-import {addQuote} from "../database/models/QuoteModel";
-import logger from "./loggerUtil";
+// Take in response and set up collector
+import {Formatters, Message, User} from 'discord.js';
+
+import {addQuote} from '../database/models/QuoteModel';
+import {getSettings} from '../database/models/SettingsModel';
+import {BediEmbed} from '../lib/BediEmbed';
+
+import colors from './colorUtil';
+import logger from './loggerUtil';
 
 export const TITLE_BEFORE_NUM_APPROVALS = 'Add Quote Reply - Approvals: ';
 
-export const setupQuoteCollector = async (response: Message, quoteAuthor: User | string | null, author: User, quote: string, date: Date, guildId: string) => {
+export const setupQuoteCollector =
+    async (response: Message, quoteAuthor: User|string|null, author: User, quote: string, date: Date, guildId: string) => {
     let numApprovals = 0;
     let approvedByString = '';
     let displayQuote = quote;
@@ -36,15 +39,13 @@ export const setupQuoteCollector = async (response: Message, quoteAuthor: User |
         const settingsData = await getSettings(interaction.guildId as string);
 
         if (numApprovals < settingsData.quoteApprovalsRequired) {
-            const embed =
-                new BediEmbed()
-                    .setColor(colors.ACTION)
-                    .setTitle(`Add Quote Reply - Approvals: ${numApprovals}/${settingsData.quoteApprovalsRequired}`);
+            const embed = new BediEmbed()
+                              .setColor(colors.ACTION)
+                              .setTitle(`Add Quote Reply - Approvals: ${numApprovals}/${settingsData.quoteApprovalsRequired}`);
 
             if (typeof quoteAuthor === 'string') {
-                embed.setDescription(
-                    `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
-                        Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
+                embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
+                    Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
             } else {
                 embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
                     Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
@@ -55,9 +56,8 @@ export const setupQuoteCollector = async (response: Message, quoteAuthor: User |
             const embed = new BediEmbed().setColor(colors.SUCCESS).setTitle('Add Quote Reply - Approved');
 
             if (typeof quoteAuthor === 'string') {
-                embed.setDescription(
-                    `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
-                        Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
+                embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
+                    Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
             } else {
                 embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
                     Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);

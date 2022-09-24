@@ -1,5 +1,6 @@
 import {PieceContext} from '@sapphire/framework';
 import {Formatters, Message} from 'discord.js';
+
 import {BediEmbed} from '../../lib/BediEmbed';
 
 const {Command} = require('@sapphire/framework');

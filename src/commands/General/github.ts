@@ -1,7 +1,8 @@
 import {PieceContext} from '@sapphire/framework';
+import {reply} from '@sapphire/plugin-editable-commands';
 import {Message, MessageActionRow, MessageButton} from 'discord.js';
+
 import {BediEmbed} from '../../lib/BediEmbed';
-import {reply} from "@sapphire/plugin-editable-commands";
 
 const {Command} = require('@sapphire/framework');
 

@@ -1,16 +1,6 @@
-import {Args, PieceContext, Result, UserError} from '@sapphire/framework';
-import {
-    Formatters,
-    Message,
-    MessageActionRow,
-    MessageButton,
-    Modal, ModalActionRowComponent,
-    Snowflake,
-    TextInputComponent,
-    User
-} from 'discord.js';
+import {Args, Command, PieceContext, Result, UserError} from '@sapphire/framework';
+import {Formatters, Message, MessageActionRow, MessageButton, Modal, ModalActionRowComponent, Snowflake, TextInputComponent, User} from 'discord.js';
 import moment from 'moment-timezone/moment-timezone-utils';
-import {Command} from '@sapphire/framework';
 
 import {MAX_QUOTE_LENGTH} from '../../config';
 import {addQuote} from '../../database/models/QuoteModel';
@@ -18,7 +8,7 @@ import {getSettings} from '../../database/models/SettingsModel';
 import {BediEmbed} from '../../lib/BediEmbed';
 import colors from '../../utils/colorUtil';
 import logger from '../../utils/loggerUtil';
-import {setupQuoteCollector, TITLE_BEFORE_NUM_APPROVALS} from "../../utils/quotesUtil";
+import {setupQuoteCollector, TITLE_BEFORE_NUM_APPROVALS} from '../../utils/quotesUtil';
 
 module.exports = class AddQuoteCommand extends Command {
     constructor(context: PieceContext) {
@@ -51,18 +41,17 @@ module.exports = class AddQuoteCommand extends Command {
                 },
             ],
         });
-        
+
         registry.registerContextMenuCommand({name: 'Add Quote', type: 'MESSAGE'});
     }
 
-    public async chatInputRun(interaction: Command.ChatInputInteraction)
-    {
-        //Get guildId from interaction
+    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+        // Get guildId from interaction
         const guildId = interaction.guildId;
         const settingsData = await getSettings(guildId as string);
         const date = moment().toDate();
 
-        //As of now you cannot reply and run chatInput... only supporting message quotes for now
+        // As of now you cannot reply and run chatInput... only supporting message quotes for now
         let author: User = interaction.user;
         let quote: string = interaction.options.getString('quote')!;
         let displayQuote = quote;
@@ -74,9 +63,8 @@ module.exports = class AddQuoteCommand extends Command {
                           .setTitle(`${TITLE_BEFORE_NUM_APPROVALS}0/${settingsData.quoteApprovalsRequired}`);
 
         if (typeof quoteAuthor === 'string') {
-            embed.setDescription(
-                `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
-                    Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
+            embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
+                Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
         } else {
             embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
                 Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
@@ -99,28 +87,21 @@ module.exports = class AddQuoteCommand extends Command {
     }
 
     public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
-
         let quote: string = await interaction.channel!.messages.fetch(interaction.targetId).then((message) => message.content);
 
         const quoteInput = new TextInputComponent()
-            .setCustomId('quoteInput')
-            .setLabel('What is the quote?')
-            .setStyle('PARAGRAPH')
-            .setValue(quote)
-            .setMaxLength(MAX_QUOTE_LENGTH);
+                               .setCustomId('quoteInput')
+                               .setLabel('What is the quote?')
+                               .setStyle('PARAGRAPH')
+                               .setValue(quote)
+                               .setMaxLength(MAX_QUOTE_LENGTH);
 
-        const authorInput = new TextInputComponent()
-            .setCustomId('authorInput')
-            .setLabel('Who is the author?')
-            .setStyle('SHORT');
+        const authorInput = new TextInputComponent().setCustomId('authorInput').setLabel('Who is the author?').setStyle('SHORT');
 
         const actionRow1 = new MessageActionRow<ModalActionRowComponent>().addComponents(quoteInput);
         const actionRow2 = new MessageActionRow<ModalActionRowComponent>().addComponents(authorInput);
 
-        const modal = new Modal()
-            .setTitle('Add Quote')
-            .setCustomId('addQuoteModal')
-            .addComponents(actionRow1, actionRow2);
+        const modal = new Modal().setTitle('Add Quote').setCustomId('addQuoteModal').addComponents(actionRow1, actionRow2);
 
         await interaction.showModal(modal);
     }
@@ -129,8 +110,8 @@ module.exports = class AddQuoteCommand extends Command {
         const {guildId, author} = message;
         const settingsData = await getSettings(guildId as string);
 
-        let quote: string| null;
-        let quoteAuthor: User | string | null;
+        let quote: string|null;
+        let quoteAuthor: User|string|null;
 
         if (message.reference) {
             // This implies that this is a reply
@@ -196,9 +177,8 @@ module.exports = class AddQuoteCommand extends Command {
         if (!displayQuote.includes('<')) displayQuote = Formatters.inlineCode(quote);
 
         if (typeof quoteAuthor === 'string') {
-            embed.setDescription(
-                `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
-                    Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
+            embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
+                Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
         } else {
             embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
                 Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
