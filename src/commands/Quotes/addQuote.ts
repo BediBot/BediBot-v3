@@ -1,5 +1,5 @@
-import {Args, PieceContext, Result, UserError} from '@sapphire/framework';
-import {Formatters, Message, MessageActionRow, MessageButton, Snowflake, User} from 'discord.js';
+import {Args, Command, PieceContext, Result, UserError} from '@sapphire/framework';
+import {Formatters, Message, MessageActionRow, MessageButton, Modal, ModalActionRowComponent, Snowflake, TextInputComponent, User} from 'discord.js';
 import moment from 'moment-timezone/moment-timezone-utils';
 
 import {MAX_QUOTE_LENGTH} from '../../config';
@@ -8,10 +8,7 @@ import {getSettings} from '../../database/models/SettingsModel';
 import {BediEmbed} from '../../lib/BediEmbed';
 import colors from '../../utils/colorUtil';
 import logger from '../../utils/loggerUtil';
-
-const {Command} = require('@sapphire/framework');
-
-const TITLE_BEFORE_NUM_APPROVALS = 'Add Quote Reply - Approvals: ';
+import {setupQuoteCollector, TITLE_BEFORE_NUM_APPROVALS} from '../../utils/quotesUtil';
 
 module.exports = class AddQuoteCommand extends Command {
     constructor(context: PieceContext) {
@@ -25,8 +22,92 @@ module.exports = class AddQuoteCommand extends Command {
         });
     }
 
+    public override registerApplicationCommands(registry: Command.Registry) {
+        registry.registerChatInputCommand({
+            name: this.name,
+            description: this.description,
+            options: [
+                {
+                    name: 'quote',
+                    description: 'The quote you want to add',
+                    type: 'STRING',
+                    required: true,
+                },
+                {
+                    name: 'author',
+                    description: 'The author of the quote',
+                    type: 'STRING',
+                    required: true,
+                },
+            ],
+        });
+
+        registry.registerContextMenuCommand({name: 'Add Quote', type: 'MESSAGE'});
+    }
+
+    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+        // Get guildId from interaction
+        const guildId = interaction.guildId;
+        const settingsData = await getSettings(guildId as string);
+        const date = moment().toDate();
+
+        // As of now you cannot reply and run chatInput... only supporting message quotes for now
+        let author: User = interaction.user;
+        let quote: string = interaction.options.getString('quote')!;
+        let displayQuote = quote;
+        if (!displayQuote.includes('<')) displayQuote = Formatters.inlineCode(quote);
+        let quoteAuthor: string = interaction.options.getString('author')!;
+
+        const embed = new BediEmbed()
+                          .setColor(colors.ACTION)
+                          .setTitle(`${TITLE_BEFORE_NUM_APPROVALS}0/${settingsData.quoteApprovalsRequired}`);
+
+        if (typeof quoteAuthor === 'string') {
+            embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
+                Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
+        } else {
+            embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
+                Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
+        }
+
+        const row = new MessageActionRow().addComponents(
+            new MessageButton().setCustomId('QuoteApprove').setLabel('Approve').setStyle('SUCCESS'),
+        );
+
+        await interaction.reply({
+            embeds: [embed],
+            components: [row],
+        });
+
+        const response = await interaction.fetchReply();
+
+        if (response instanceof Message) {
+            await setupQuoteCollector(response, quoteAuthor, author, quote, date, guildId as string);
+        }
+    }
+
+    public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
+        let quote: string = await interaction.channel!.messages.fetch(interaction.targetId).then((message) => message.content);
+
+        const quoteInput = new TextInputComponent()
+                               .setCustomId('quoteInput')
+                               .setLabel('What is the quote?')
+                               .setStyle('PARAGRAPH')
+                               .setValue(quote)
+                               .setMaxLength(MAX_QUOTE_LENGTH);
+
+        const authorInput = new TextInputComponent().setCustomId('authorInput').setLabel('Who is the author?').setStyle('SHORT');
+
+        const actionRow1 = new MessageActionRow<ModalActionRowComponent>().addComponents(quoteInput);
+        const actionRow2 = new MessageActionRow<ModalActionRowComponent>().addComponents(authorInput);
+
+        const modal = new Modal().setTitle('Add Quote').setCustomId('addQuoteModal').addComponents(actionRow1, actionRow2);
+
+        await interaction.showModal(modal);
+    }
+
     async messageRun(message: Message, args: Args) {
-        const {guild, guildId, author} = message;
+        const {guildId, author} = message;
         const settingsData = await getSettings(guildId as string);
 
         let quote: string|null;
@@ -112,82 +193,6 @@ module.exports = class AddQuoteCommand extends Command {
             components: [row],
         });
 
-        let numApprovals = 0;
-        let approvedByString = '';
-
-        const collector = response.createMessageComponentCollector({componentType: 'BUTTON', time: 10000000});
-        collector.on('collect', async interaction => {
-            if (!interaction.isButton() || interaction.customId != 'QuoteApprove') return;
-
-            await interaction.deferUpdate();
-
-            collector.resetTimer();  // If someone interacts, reset the timer to give more time for approvals to come in
-
-            const message = interaction.message;
-            if (!(message instanceof Message)) return;
-
-            let description = message.embeds[0].description;
-
-            if (description?.includes(interaction.user.toString())) return;
-
-            numApprovals++;
-
-            approvedByString += ` ${interaction.user}`;
-
-            const settingsData = await getSettings(interaction.guildId as string);
-
-            if (numApprovals < settingsData.quoteApprovalsRequired) {
-                const embed =
-                    new BediEmbed()
-                        .setColor(colors.ACTION)
-                        .setTitle(`Add Quote Reply - Approvals: ${numApprovals}/${settingsData.quoteApprovalsRequired}`);
-
-                if (typeof quoteAuthor === 'string') {
-                    embed.setDescription(
-                        `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
-                            Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
-                } else {
-                    embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
-                        Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
-                }
-
-                await message.edit({embeds: [embed]});
-            } else {
-                const embed = new BediEmbed().setColor(colors.SUCCESS).setTitle('Add Quote Reply - Approved');
-
-                if (typeof quoteAuthor === 'string') {
-                    embed.setDescription(
-                        `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
-                            Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
-                } else {
-                    embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
-                        Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By: ${approvedByString}`);
-                }
-
-                await addQuote(interaction.guildId as string, quote as string, quoteAuthor!.toString(), date);
-
-                await message.edit({
-                    embeds: [embed],
-                    components: [],
-                });
-                collector.stop();
-            }
-        });
-        collector.on('end', async interaction => {
-            if (numApprovals < settingsData.quoteApprovalsRequired) {
-                const embed = response.embeds[0];
-                embed.setTitle('Add Quote Reply - Timed Out').setColor(colors.ERROR);
-
-                await response
-                    .edit({
-                        embeds: [embed],
-                        components: [],
-                    })
-                    .catch(
-                        () => logger.error(
-                            `Unable to edit Add Quote Response in ${message.guild?.name}.` +
-                            `Usually due to response being deleted by an admin.`));
-            }
-        });
+        await setupQuoteCollector(response, quoteAuthor, author, quote, date, guildId as string);
     }
 };

@@ -30,7 +30,7 @@ module.exports = class GetQuotesCommand extends Command {
         let quoteAuthor;
 
         quoteAuthor = await args.pick('user').catch(() => null);
-        if (!quoteAuthor) quoteAuthor = await args.pickResult('string');
+        if (!quoteAuthor) quoteAuthor = await args.pick('string').catch(() => null);
 
         if (!quoteAuthor) {
             const embed = new BediEmbed()
