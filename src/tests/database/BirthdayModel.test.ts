@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import birthdayModel, {getBirthdaysFromMonth, getBirthdaysToday, updateBirthday} from '../../database/models/BirthdayModel';
 import logger from '../../utils/loggerUtil';
 
