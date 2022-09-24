@@ -4,11 +4,7 @@ import {hashString} from '../../utils/hashUtil';
 
 describe('PendingVerification DB', () => {
     beforeAll(async () => {
-        await mongoose.connect(process.env.MONGO_URL + 'pendingVerification' as string, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-        });
+        await mongoose.connect(process.env.MONGO_URL + 'pendingVerification' as string);
     });
 
     afterEach(async () => {

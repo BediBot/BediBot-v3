@@ -5,11 +5,7 @@ import {hashString} from '../../utils/hashUtil';
 
 describe('VerifiedUsers DB', () => {
     beforeAll(async () => {
-        await mongoose.connect(process.env.MONGO_URL + 'VerifiedUsers' as string, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-        });
+        await mongoose.connect(process.env.MONGO_URL + 'VerifiedUsers' as string);
     });
 
     afterEach(async () => {
