@@ -35,11 +35,12 @@ module.exports = class SetApprovalsCommand extends Command {
 
         await settingsModel.updateOne({_id: guildId as string}, {quoteApprovalsRequired: newValue});
 
-        const embed = new BediEmbed()
-                          .setTitle('Set Quote Approvals Reply')
-                          .setColor(colors.SUCCESS)
-                          .setDescription(`The number of quote approvals required has been updated to ${
-                              Formatters.inlineCode(newValue.toString())}`);
+        const embed =
+            new BediEmbed()
+                .setTitle('Set Quote Approvals Reply')
+                .setColor(colors.SUCCESS)
+                .setDescription(
+                    `The number of quote approvals required has been updated to ${Formatters.inlineCode(newValue.toString())}`);
         return message.reply({embeds: [embed]});
     };
 };

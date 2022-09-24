@@ -29,8 +29,8 @@ module.exports = class AddQuoteCommand extends Command {
         const {guild, guildId, author} = message;
         const settingsData = await getSettings(guildId as string);
 
-        let quote: string| null;
-        let quoteAuthor: User | string | null;
+        let quote: string|null;
+        let quoteAuthor: User|string|null;
 
         if (message.reference) {
             // This implies that this is a reply
@@ -96,9 +96,8 @@ module.exports = class AddQuoteCommand extends Command {
         if (!displayQuote.includes('<')) displayQuote = Formatters.inlineCode(quote);
 
         if (typeof quoteAuthor === 'string') {
-            embed.setDescription(
-                `Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
-                    Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
+            embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${Formatters.inlineCode(quoteAuthor as string)}\nDate: <t:${
+                Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
         } else {
             embed.setDescription(`Quote: ${displayQuote}\nAuthor: ${quoteAuthor}\nDate: <t:${
                 Math.round(date.valueOf() / 1000)}:f>\nSubmitted By: ${author}\nApproved By:`);
