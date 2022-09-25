@@ -1,7 +1,6 @@
 import {Precondition} from '@sapphire/framework';
 import {CommandInteraction, ContextMenuInteraction, Message} from 'discord.js';
 
-
 import {getSettings} from '../database/models/SettingsModel';
 
 export class QuotesEnabledPrecondition extends Precondition {
