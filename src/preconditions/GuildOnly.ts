@@ -1,5 +1,7 @@
-import {Precondition} from '@sapphire/framework';
-import {CommandInteraction, ContextMenuInteraction, Message} from 'discord.js';
+import {Command, Precondition} from '@sapphire/framework';
+import {ContextMenuInteraction, Message} from 'discord.js';
+
+import ChatInputInteraction = Command.ChatInputInteraction;
 
 module.exports = class GuildPrecondition extends Precondition {
     public messageRun(message: Message) {
@@ -7,7 +9,7 @@ module.exports = class GuildPrecondition extends Precondition {
         return this.error({message: 'This command can only be used in guilds.'});
     }
 
-    public chatInputRun(interaction: CommandInteraction) {
+    public chatInputRun(interaction: ChatInputInteraction) {
         if (interaction.guild) return this.ok();
         return this.error({message: 'This command can only be used in guilds.'});
     }
@@ -15,5 +17,11 @@ module.exports = class GuildPrecondition extends Precondition {
     public contextMenuRun(interaction: ContextMenuInteraction) {
         if (interaction.guild) return this.ok();
         return this.error({message: 'This command can only be used in guilds.'});
+    }
+}
+
+declare module '@sapphire/framework' {
+    interface Preconditions {
+        GuildOnly: never;
     }
 }
