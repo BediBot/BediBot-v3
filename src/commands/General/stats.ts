@@ -1,11 +1,9 @@
-import {PieceContext} from '@sapphire/framework';
+import {Command, PieceContext} from '@sapphire/framework';
 import {reply} from '@sapphire/plugin-editable-commands';
 import {Formatters, Message} from 'discord.js';
 
 import {BediEmbed} from '../../lib/BediEmbed';
 import {numGuilds, numUsers} from '../../utils/discordUtil';
-
-const {Command} = require('@sapphire/framework');
 
 module.exports = class StatsCommand extends Command {
     constructor(context: PieceContext) {
@@ -17,12 +15,22 @@ module.exports = class StatsCommand extends Command {
         });
     }
 
+    public override registerApplicationCommands(registry: Command.Registry) {
+        registry.registerChatInputCommand({name: this.name, description: this.description});
+    }
+
+    async chatInputRun(interaction: Command.ChatInputInteraction) {
+        return interaction.reply({embeds: [await this.getEmbed()], ephemeral: true});
+    }
+
     async messageRun(message: Message) {
-        const embed =
-            new BediEmbed()
-                .setTitle('Stats Reply')
-                .setDescription(`Guild Count: ${Formatters.inlineCode(String(numGuilds(this.container.client)))}\nMember Count: ${
-                    Formatters.inlineCode(String(await numUsers(this.container.client)))}`);
-        return reply(message, {embeds: [embed]});
+        return reply(message, {embeds: [await this.getEmbed()]});
+    }
+
+    private async getEmbed() {
+        return new BediEmbed()
+            .setTitle('Stats Reply')
+            .setDescription(`Guild Count: ${Formatters.inlineCode(String(numGuilds(this.container.client)))}\nMember Count: ${
+                Formatters.inlineCode(String(await numUsers(this.container.client)))}`);
     }
 };
